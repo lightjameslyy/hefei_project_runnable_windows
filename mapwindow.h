@@ -74,8 +74,8 @@ public:
     bool PMPLAxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, int &yEnd, int &ySize,QFileInfoList path, int tunnelCount = 1);
     bool UGM3AxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, int &yEnd, int &ySize,QFileInfoList path);
     bool PMPLRAxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, int &yEnd, int &ySize,QFileInfoList path);
-    bool LAYERAxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, int &yEnd, int &ySize,QFileInfoList path);
-    bool CLHAxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, int &yEnd, int &ySize,QFileInfoList path);
+    bool LAYERAxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, int &yEnd, int &ySize,QString path/*QFileInfoList path*/);
+    bool CLHAxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, int &yEnd, int &ySize,QString path/*QFileInfoList path*/);
     bool EXTAxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, int &yEnd, int &ySize,QFileInfoList path);
 
     void setGradientScale(QCPColorMap *colorMap);
@@ -102,6 +102,8 @@ public slots:
 private slots:
     void on_closeButton_clicked();
 
+    void on_captureButton_clicked();
+    
 private:
     Ui::MapWindow *ui;
     QString dataDir;

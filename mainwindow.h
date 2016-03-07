@@ -24,6 +24,11 @@ public:
     void setDrawn(int index, bool isDrawn); //index==>[0...5]
     bool getDrawn(int index);
 
+    //获取文件的类型（后缀名）
+    QString getFiletypeFromFilePath(QString path);
+    QString getFiletypeFromFileDir(QString dir);
+
+
 private slots:
     void on_btn_site_clicked();
 

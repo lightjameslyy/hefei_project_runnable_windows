@@ -7,7 +7,7 @@ MapWindow::MapWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MapWindow)
 {
-    qDebug()<<this->parent();
+//    qDebug()<<this->parent();
     ui->setupUi(this);
     setWindowFlags(Qt::CustomizeWindowHint );
     this->list.push_back(QVector<QVector<DataFormat*> >());
@@ -121,9 +121,9 @@ bool MapWindow::PMPLAxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, i
     return true;
 }
 
-bool MapWindow::CLHAxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, int &yEnd, int &ySize, QFileInfoList list)
+bool MapWindow::CLHAxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, int &yEnd, int &ySize, QString path/*QFileInfoList list*/)
 {
-    QString path = list[0].absoluteFilePath();
+//    QString path = list[0].absoluteFilePath();
     QFile file(path);
     if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
@@ -262,9 +262,9 @@ bool MapWindow::PMPLRAxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, 
     return true;
 }
 
-bool MapWindow::LAYERAxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, int &yEnd, int &ySize, QFileInfoList list)
+bool MapWindow::LAYERAxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, int &yEnd, int &ySize, QString path/*QFileInfoList list*/)
 {
-    QString path = list[0].absoluteFilePath();
+//    QString path = list[0].absoluteFilePath();
     QFile file(path);
     if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
@@ -273,7 +273,7 @@ bool MapWindow::LAYERAxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, 
     }
 
     QTextStream in(&file);
-    qDebug()<<in.status();
+//    qDebug()<<in.status();
 
     xStart = 0;
     xEnd = 0;
@@ -463,6 +463,7 @@ void MapWindow::drawSingleLine(QVector<DataFormat *> &vec)
 
 }
 
+
 void MapWindow::showToolTip()
 {
     qDebug()<<QCursor::pos().x()<<QCursor::pos().y();
@@ -474,7 +475,7 @@ void MapWindow::drawPMPLMap(int tunnelCount , bool isRealTime , int samplingGap)
 {
     ui->label->setText("pmpl");
 
-    //根据dir得到.ugm3文件列表
+    //根据dir得到.pmpl文件列表
     QDir dir(this->dataDir);
     QFileInfoList infoList = dir.entryInfoList(QDir::Files|QDir::NoDotAndDotDot);
 
@@ -546,9 +547,10 @@ void MapWindow::drawPMPLMap(int tunnelCount , bool isRealTime , int samplingGap)
 void MapWindow::drawCLHMap(bool isRealtime, int samplingGap)
 {
     ui->label->setText("clh");
-    //根据dir得到.clh文件列表,默认ccloudtxt文件下只有一个文件
-    QDir dir(this->dataDir);
-    QFileInfoList infoList = dir.entryInfoList(QDir::Files|QDir::NoDotAndDotDot);
+    //得到.clh文件路径
+    QString path = this->dataDir;
+//    QDir dir(this->dataDir);
+//    QFileInfoList infoList = dir.entryInfoList(QDir::Files|QDir::NoDotAndDotDot);
 
 
     ui->singleLinePlot->setVisible(false);
@@ -562,7 +564,7 @@ void MapWindow::drawCLHMap(bool isRealtime, int samplingGap)
 
     //获取横纵坐标相关参数
     int xStart, xEnd, xSize, ySize, yStart, yEnd;
-    this->CLHAxisParam(xStart, xEnd, xSize, yStart, yEnd, ySize, infoList);
+    this->CLHAxisParam(xStart, xEnd, xSize, yStart, yEnd, ySize, path);
 
     // set up the QCPColorMap:
     QCPColorMap *colorMap = new QCPColorMap(ui->customPlot->xAxis, ui->customPlot->yAxis);
@@ -729,9 +731,10 @@ void MapWindow::drawLAYERMap(bool isRealtime, int samplingGap)
 {
     ui->label->setText("layer");
 
-    //根据dir得到.文件列表,默认ccloudtxt文件下只有一个文件
-    QDir dir(this->dataDir);
-    QFileInfoList infoList = dir.entryInfoList(QDir::Files|QDir::NoDotAndDotDot);
+    //根据dir得到.layer文件路径
+    QString path = this->dataDir;
+//    QDir dir(this->dataDir);
+//    QFileInfoList infoList = dir.entryInfoList(QDir::Files|QDir::NoDotAndDotDot);
 
 
     ui->singleLinePlot->setVisible(false);
@@ -745,7 +748,7 @@ void MapWindow::drawLAYERMap(bool isRealtime, int samplingGap)
 
     //获取横纵坐标相关参数
     int xStart, xEnd, xSize, ySize, yStart, yEnd;
-    this->LAYERAxisParam(xStart, xEnd, xSize, yStart, yEnd, ySize, infoList);
+    this->LAYERAxisParam(xStart, xEnd, xSize, yStart, yEnd, ySize, path);
 
 
     QVector<double> x(xSize),y(xSize);
@@ -960,9 +963,8 @@ void MapWindow::updateUGM3Map()
 
 void MapWindow::on_closeButton_clicked()
 {
-    qDebug()<<this->parent();
-    MainWindow *mw = (MainWindow*)this->parent();
-    qDebug()<<(MainWindow*)mw;
+//    qDebug()<<this->parent()->parent();
+    MainWindow *mw = (MainWindow*)this->parent()->parent()->parent()->parent()->parent()->parent()->parent();
     switch (this->filetype) {
     case ColorMap::PMPL:
         mw->setDrawn(0, false);
@@ -986,6 +988,16 @@ void MapWindow::on_closeButton_clicked()
         break;
     }
     qDebug()<<"close"<<mw->getDrawn(0);
+
+    QListWidget *qlw = (QListWidget*)this->parent()->parent();
+    int row = 0;
+    while(QListWidgetItem *item = qlw->item(row))
+    {
+        if(qlw->itemWidget(item) == this)
+            qlw->takeItem(row);
+        row++;
+    }
+
 }
 
 void MapWindow::setFiletype(const ColorMap::FILE_TYPE &value)
@@ -996,4 +1008,12 @@ void MapWindow::setFiletype(const ColorMap::FILE_TYPE &value)
 ColorMap::FILE_TYPE MapWindow::getFiletype() const
 {
     return filetype;
+}
+
+
+
+void MapWindow::on_captureButton_clicked()
+{
+    QPixmap capture = this->grab(this->rect());
+    capture.save("/Users/lightjames/Desktop/a.png","png");
 }

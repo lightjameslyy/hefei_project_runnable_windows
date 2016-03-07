@@ -14,9 +14,8 @@ MainWindow::MainWindow(QWidget *parent) :
     this->dialog_site = NULL;
     this->dialog_graph = NULL;
 
-    //QUrl url("file:///Users/lightjames/workspace/Qt/Project/mymap.html");
 //    QUrl url("file:///C:\\Users\\LiYazhou\\Desktop\\hefei_project-master\\mymap.html");
-    QUrl url("file:///C:/workspace/qt/hefei_project-master/mymap.html");
+    QUrl url("file:///C:/workspace/qt/hefei_project_runnable_windows/mymap.html");
     ui->webView_map->setUrl(url);
 
     ui->listWidget->setAutoScroll(true);
@@ -55,7 +54,7 @@ void MainWindow::on_btn_graphDisplay_clicked()
     if(!this->dialog_graph)
         dialog_graph = new Dialog_GraphDisplay(this);
 
-    qDebug()<<this;
+//    qDebug()<<this;
     dialog_graph->show();
 }
 
@@ -71,40 +70,58 @@ void MainWindow::draw(QString dataDir, ColorMap::FILE_TYPE filetype)
 {
     switch (filetype) {
     case ColorMap::PMPL:
+//        qDebug()<<getFiletypeFromFileDir(dataDir);
+        if(getFiletypeFromFileDir(dataDir) != ".pmpl")
+            return;
         if(getDrawn(0))
             return;
+        break;
     case ColorMap::CLH:
+        if(getFiletypeFromFilePath(dataDir) != ".clh")
+            return;
         if(getDrawn(1))
             return;
+        break;
     case ColorMap::EXT:
+        if(getFiletypeFromFileDir(dataDir) != ".ext")
+            return;
         if(getDrawn(2))
             return;
+        break;
     case ColorMap::LAYER:
+        if(getFiletypeFromFilePath(dataDir) != ".layer")
+            return;
         if(getDrawn(3))
             return;
+        break;
     case ColorMap::UGM3:
+        if(getFiletypeFromFileDir(dataDir) != ".ugm3")
+            return;
         if(getDrawn(4))
             return;
+        break;
     case ColorMap::PMPLR:
+        if(getFiletypeFromFileDir(dataDir) != ".pmplr")
+            return;
         if(getDrawn(5))
             return;
+        break;
     default:
         break;
     }
 
     MapWindow *mp = new MapWindow(this);
-    qDebug()<<this;
+//    qDebug()<<this;
     mp->setFiletype(filetype);
-    qDebug()<<mp->getFiletype();
-
     mp->plot(dataDir, filetype);
     mp->setFixedSize(mp->width(),mp->height());
 
-    QListWidgetItem* item = new QListWidgetItem;
+    QListWidgetItem* item = new QListWidgetItem(ui->listWidget);
     item->setSizeHint(QSize(item->sizeHint().width(),mp->height()));
     ui->listWidget->addItem(item);
+
     ui->listWidget->setItemWidget(item, mp);
-//    mp->setParent(this);
+//    qDebug()<<mp->parent()->parent()->parent()->parent()->parent()->parent()->parent();
 
     switch (filetype) {
     case ColorMap::PMPL:
@@ -139,6 +156,23 @@ void MainWindow::setDrawn(int index, bool isDrawn)
 bool MainWindow::getDrawn(int index)
 {
     return this->drawn[index];
+}
+
+QString MainWindow::getFiletypeFromFilePath(QString path)
+{
+    int index = path.lastIndexOf('.');
+    return path.right(path.length()-index);
+}
+
+QString MainWindow::getFiletypeFromFileDir(QString dir)
+{
+    QDir mdir(dir);
+    QFileInfoList infoList = mdir.entryInfoList(QDir::Files|QDir::NoDotAndDotDot);
+
+    if(!infoList.size())
+        return "";
+    else
+        return getFiletypeFromFilePath(infoList[0].absoluteFilePath());
 }
 
 void MainWindow::on_groupBox_clicked()

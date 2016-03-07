@@ -3,6 +3,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QDebug>
+#include <QFileDialog>
 
 Dialog_GraphDisplay::Dialog_GraphDisplay(QWidget *parent) :
     QDialog(parent),
@@ -18,49 +19,89 @@ Dialog_GraphDisplay::~Dialog_GraphDisplay()
 
 void Dialog_GraphDisplay::on_buttonBox_accepted()
 {
+    QString path;
+
+//    qDebug()<<fileName;
     //mmpldata
 
     if (ui->radioButton->isChecked())
     {
+        path = QFileDialog::getExistingDirectory(
+                    this,
+                    tr("Open Directory"),
+                    "/",
+                    QFileDialog::ShowDirsOnly|QFileDialog::DontResolveSymlinks
+                    );
         MainWindow *ptr = (MainWindow*)parentWidget();
         qDebug()<<"init ptr"<<ptr->getDrawn(0);
-        ptr->draw("C:/workspace/qt/hefei_project-master/test_data/mmpldata/20150624_1tunnel", ColorMap::PMPL);
+        ptr->draw(path, ColorMap::PMPL);
         qDebug()<<"after draw"<<ptr->getDrawn(0);
         ui->radioButton->setChecked(false);
     }
     //ccloudtxt
     if (ui->radioButton_2->isChecked())
     {
+        path = QFileDialog::getOpenFileName(
+                    this,
+                    tr("Open File"),
+                    "/",
+                    "All Files (*.*);;PMPL File (*.pmpl);;CLH File (*.clh);;EXT File (*.ext);;LAYER File (*.layer);;PPM10 File (*.ugm3);;PPR File (*.pmplr)"
+                    );
+        qDebug()<<path;
         MainWindow *ptr = (MainWindow*)parentWidget();
-        ptr->draw("C:/workspace/qt/hefei_project-master/test_data/ccloudtxt", ColorMap::CLH);
+        ptr->draw(path, ColorMap::CLH);
         ui->radioButton_2->setChecked(false);
     }
     //eext
     if (ui->radioButton_3->isChecked())
     {
+        path = QFileDialog::getExistingDirectory(
+                    this,
+                    tr("Open Directory"),
+                    "/",
+                    QFileDialog::ShowDirsOnly|QFileDialog::DontResolveSymlinks
+                    );
         MainWindow *ptr = (MainWindow*)parentWidget();
-        ptr->draw("C:/workspace/qt/hefei_project-master/test_data/eext/20150929", ColorMap::EXT);
+        ptr->draw(path, ColorMap::EXT);
         ui->radioButton_3->setChecked(false);
     }
     //llaytxt
     if (ui->radioButton_4->isChecked())
     {
+        path = QFileDialog::getOpenFileName(
+                    this,
+                    tr("Open File"),
+                    "/",
+                    "All Files (*.*);;PMPL File (*.pmpl);;CLH File (*.clh);;EXT File (*.ext);;LAYER File (*.layer);;PPM10 File (*.ugm3);;PPR File (*.pmplr)"
+                    );
         MainWindow *ptr = (MainWindow*)parentWidget();
-        ptr->draw("C:/workspace/qt/hefei_project-master/test_data/llaytxt", ColorMap::LAYER);
+        ptr->draw(path, ColorMap::LAYER);
         ui->radioButton_4->setChecked(false);
     }
     //ppm10
     if (ui->radioButton_5->isChecked())
     {
+        path = QFileDialog::getExistingDirectory(
+                    this,
+                    tr("Open Directory"),
+                    "/",
+                    QFileDialog::ShowDirsOnly|QFileDialog::DontResolveSymlinks
+                    );
         MainWindow *ptr = (MainWindow*)parentWidget();
-        ptr->draw("C:/workspace/qt/hefei_project-master/test_data/ppm10/20150929", ColorMap::UGM3);
+        ptr->draw(path, ColorMap::UGM3);
         ui->radioButton_5->setChecked(false);
     }
     //ppr
     if (ui->radioButton_6->isChecked())
     {
+        path = QFileDialog::getExistingDirectory(
+                    this,
+                    tr("Open Directory"),
+                    "/",
+                    QFileDialog::ShowDirsOnly|QFileDialog::DontResolveSymlinks
+                    );
         MainWindow *ptr = (MainWindow*)parentWidget();
-        ptr->draw("C:/workspace/qt/hefei_project-master/test_data/ppr/20150929", ColorMap::PMPLR);
+        ptr->draw(path, ColorMap::PMPLR);
         ui->radioButton_6->setChecked(false);
     }
 
