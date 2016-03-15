@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "myglwidget.h"
 #include "ui_mainwindow.h"
 #include "QDebug"
 #include "QFile"
@@ -178,4 +179,21 @@ QString MainWindow::getFiletypeFromFileDir(QString dir)
 void MainWindow::on_groupBox_clicked()
 {
 
+}
+
+void MainWindow::on_btn_3DDisplay_clicked()
+{
+    QString dataDir;
+
+    dataDir = QFileDialog::getExistingDirectory(
+                this,
+                tr("Open Directory"),
+                "/",
+                QFileDialog::ShowDirsOnly|QFileDialog::DontResolveSymlinks
+                );
+
+    MyGLWidget *w = new MyGLWidget(dataDir);
+    w->resize(1000,800);
+    w->show();
+    qDebug() << dataDir;
 }

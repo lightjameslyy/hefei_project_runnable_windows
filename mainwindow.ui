@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1310</width>
-    <height>802</height>
+    <width>1350</width>
+    <height>800</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -29,6 +29,13 @@
             <widget class="QPushButton" name="btn_graphDisplay">
              <property name="text">
               <string>图形显示</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btn_3DDisplay">
+             <property name="text">
+              <string>3D扫描图</string>
              </property>
             </widget>
            </item>
@@ -69,6 +76,18 @@
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
          <widget class="QGroupBox" name="groupBox_2">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>350</width>
+            <height>0</height>
+           </size>
+          </property>
           <property name="maximumSize">
            <size>
             <width>250</width>
@@ -83,6 +102,24 @@
             <layout class="QVBoxLayout" name="verticalLayout_4">
              <item>
               <widget class="QWebView" name="webView_map">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>330</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>224</width>
+                 <height>16777215</height>
+                </size>
+               </property>
                <property name="url">
                 <url>
                  <string>about:blank</string>
@@ -165,6 +202,12 @@
         </item>
         <item>
          <widget class="QTabWidget" name="tabWidget">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="currentIndex">
            <number>0</number>
           </property>
@@ -186,7 +229,14 @@
            </attribute>
            <layout class="QVBoxLayout" name="verticalLayout_10">
             <item>
-             <widget class="QListWidget" name="listWidget"/>
+             <widget class="QListWidget" name="listWidget">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
             </item>
            </layout>
           </widget>
@@ -209,8 +259,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1310</width>
-     <height>22</height>
+     <width>1350</width>
+     <height>20</height>
     </rect>
    </property>
   </widget>

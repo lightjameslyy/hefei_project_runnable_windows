@@ -36,6 +36,8 @@ private slots:
 
     void on_groupBox_clicked();
 
+    void on_btn_3DDisplay_clicked();
+
 private:
     Ui::MainWindow *ui;
     Dialog_GraphDisplay *dialog_graph;
