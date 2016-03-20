@@ -193,7 +193,14 @@ void MainWindow::on_btn_3DDisplay_clicked()
                 );
 
     MyGLWidget *w = new MyGLWidget(dataDir);
+
+    QDir dir(dataDir);
+    QFileInfoList infoList = dir.entryInfoList(QDir::Files|QDir::NoDotAndDotDot);
+
+    w->get3DDataParam(infoList);        //现在w->data3D已经赋值完毕
+
     w->resize(1000,800);
     w->show();
-    qDebug() << dataDir;
+//    qDebug() << dataDir;
+
 }

@@ -71,12 +71,12 @@ public:
     /*
      * 解析PMPL图坐标轴参数，如果成功返回true，否则返回false。下面几个函数同理
      */
-    bool PMPLAxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, int &yEnd, int &ySize,QFileInfoList path, int tunnelCount = 1);
-    bool UGM3AxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, int &yEnd, int &ySize,QFileInfoList path);
-    bool PMPLRAxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, int &yEnd, int &ySize,QFileInfoList path);
+    bool PMPLAxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, int &yEnd, int &ySize,QFileInfoList list, int tunnelCount = 1);
+    bool UGM3AxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, int &yEnd, int &ySize,QFileInfoList list);
+    bool PMPLRAxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, int &yEnd, int &ySize,QFileInfoList list);
     bool LAYERAxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, int &yEnd, int &ySize,QString path/*QFileInfoList path*/);
     bool CLHAxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, int &yEnd, int &ySize,QString path/*QFileInfoList path*/);
-    bool EXTAxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, int &yEnd, int &ySize,QFileInfoList path);
+    bool EXTAxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, int &yEnd, int &ySize,QFileInfoList list);
 
     void setGradientScale(QCPColorMap *colorMap);
 
