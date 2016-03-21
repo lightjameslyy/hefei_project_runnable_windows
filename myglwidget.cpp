@@ -1,4 +1,6 @@
 #include "MyGLWidget.h"
+#include <cstdio>
+#include <algorithm>
 #include <gl/glu.h>
 #include <QtOpenGL>
 #include <QKeyEvent>
@@ -8,8 +10,8 @@
 MyGLWidget::MyGLWidget(QWidget *parent) :
     QGLWidget(parent)
 {
-    rotX = 0.0f;
-    rotY = 0.0f;
+    rotX = 20.0f;
+    rotY = -20.0f;
     rotZ = 0.0f;
     moveX = 0.0f;
     moveY = 0.0f;
@@ -20,8 +22,8 @@ MyGLWidget::MyGLWidget(QWidget *parent) :
 
 MyGLWidget::MyGLWidget(QString dataDir)
 {
-    rotX = 0.0f;
-    rotY = 0.0f;
+    rotX = 20.0f;
+    rotY = -20.0f;
     rotZ = 0.0f;
     moveX = 0.0f;
     moveY = 0.0f;
@@ -52,7 +54,7 @@ void MyGLWidget::resizeGL(int w, int h)                 //重置OpenGL窗口的�
     glMatrixMode(GL_PROJECTION);                        //选择投影矩阵
     glLoadIdentity();                                   //重置投影矩阵
     //设置视口的大小
-    gluPerspective(45.0, (GLfloat)w/(GLfloat)h, 0.1, 100.0);
+    gluPerspective(60.0, (GLfloat)w/(GLfloat)h, 0.1, 1000.0);
     glMatrixMode(GL_MODELVIEW);                         //选择模型观察矩阵
     glLoadIdentity();                                   //重置模型观察矩阵
 }
@@ -73,9 +75,80 @@ void MyGLWidget::paintGL()                              //从这里开始进行�
     glRotatef(rotY, 0.0f, 1.0f, 0.0f);
     glRotatef(rotZ, 0.0f, 0.0f, 1.0f);
 
+//    qDebug()<<rotX<<rotY<<rotZ;
     drawAxis();
 
-    draw();
+    draw3D();
+}
+
+bool MyGLWidget::get3DDataParam(QFileInfoList list)
+{
+//    QVector<MapPos> allPos;     //不存重复的经纬度位置信息
+    this->data3D.clear();
+    int fileNum = list.size();
+
+    QString lastPosInfo = "";
+    for (int i = 0; i < fileNum; i++)      //遍历所有.pmpl文件
+    {
+        QFile file(list[i].absoluteFilePath());
+        if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
+        {
+            qDebug()<<"文件未找到";
+            return false;
+        }
+
+        QTextStream in(&file);
+        QString posInfo;
+        in>>posInfo;
+
+        if (lastPosInfo == posInfo || posInfo.indexOf(',') == -1)
+            continue;
+        else {
+            lastPosInfo = posInfo;
+        }
+
+        MapPos* pos = getMapPosFromLine(posInfo);
+        in.readLine();
+        in.readLine();
+
+        QVector<MetaDataFormat*> metaDatas;
+        setMaxHeight(0);
+        setMaxValue(0);
+        int height;
+        double value;
+        while (in.atEnd() == false) {
+            in>>height>>value;
+//            MetaDataFormat* metaData = new MetaDataFormat(height, value);
+            metaDatas.push_back(new MetaDataFormat(height, value));
+            setMaxHeight(std::max(getMaxHeight(), height));
+            setMaxValue(std::max(getMaxValue(), value));
+//            maxHeight = std::max(maxHeight, height);
+//            maxValue = std::max(maxValue, value);
+            in.readLine();
+        }
+//        MapDataFormat* mapData = new MapDataFormat(*pos, *metaDatas);
+        this->data3D.push_back(new MapDataFormat(pos, metaDatas));
+
+//        printf("%.7f,%.7f\n", pos->longtitude, pos->latitude);
+//        qDebug()<< pos->longtitude<<pos->latitude;
+//        qDebug()<<lat;
+
+
+    }
+
+    return true;
+}
+
+MapPos* MyGLWidget::getMapPosFromLine(QString s)
+{
+    double longtitude;
+    double latitude;
+    int colonPos = s.indexOf(',');
+    QString lot = s.left(colonPos - 1);
+    QString lat = s.mid(colonPos+1, s.size()-colonPos-2);
+    longtitude = lot.toDouble();
+    latitude = lat.toDouble();
+    return new MapPos(longtitude, latitude);
 }
 
 void MyGLWidget::mousePressEvent(QMouseEvent *event)
@@ -119,22 +192,42 @@ void MyGLWidget::wheelEvent(QWheelEvent *event)
     updateGL();
 }
 
+double MyGLWidget::getMaxValue() const
+{
+    return maxValue;
+}
+
+void MyGLWidget::setMaxValue(double value)
+{
+    maxValue = value;
+}
+
+int MyGLWidget::getMaxHeight() const
+{
+    return maxHeight;
+}
+
+void MyGLWidget::setMaxHeight(int value)
+{
+    maxHeight = value;
+}
+
 void MyGLWidget::drawAxis()
 {
-    glLineWidth(0.5f);
-    for (GLfloat i = 0.0f; i <= 36; i += 0.3f)
-    {
-        glColor3f(1.0f, 1.0f, 1.0f);
-        glBegin(GL_LINES);
-            glVertex3f(-18.0f, 0.0f, -18.0f+i);
-            glVertex3f(18.0f, 0.0f, -18.0f+i);
-        glEnd();
-        glColor3f(1.0f, 1.0f, 1.0f);
-        glBegin(GL_LINES);
-            glVertex3f(-18.0f+i, 0.0f, -18.0f);
-            glVertex3f(-18.0f+i, 0.0f, 18.0f);
-        glEnd();
-    }
+//    glLineWidth(0.5f);
+//    for (GLfloat i = 0.0f; i <= 36; i += 0.3f)
+//    {
+//        glColor3f(1.0f, 1.0f, 1.0f);
+//        glBegin(GL_LINES);
+//            glVertex3f(-18.0f, 0.0f, -18.0f+i);
+//            glVertex3f(18.0f, 0.0f, -18.0f+i);
+//        glEnd();
+//        glColor3f(1.0f, 1.0f, 1.0f);
+//        glBegin(GL_LINES);
+//            glVertex3f(-18.0f+i, 0.0f, -18.0f);
+//            glVertex3f(-18.0f+i, 0.0f, 18.0f);
+//        glEnd();
+//    }
 
     glLineWidth(2.0f);
     //x axis
@@ -182,13 +275,22 @@ void MyGLWidget::drawAxis()
     //    glEnd();
 }
 
-void MyGLWidget::draw()
+void MyGLWidget::draw3D()
 {
-    //根据dir得到.pmpl文件列表
-    QDir dir(dataDir);
-    QFileInfoList infoList = dir.entryInfoList(QDir::Files|QDir::NoDotAndDotDot);
+    //数据已经在data3D中了
 
+    qDebug()<<maxHeight<<maxValue;
+    qDebug()<<data3D.size();
+    glLineWidth(2.0f);
+    for(auto item : data3D) {
+//        qDebug()<<item->pos->longtitude<<item->pos->latitude;
+//        glLineWidth(2.0f);
+        for (auto point : item->data) {
+            glColor3f(point->value/maxValue, 1.0f, 0.0f);
+            glBegin(GL_POINTS);
+                glVertex3f(item->pos->longtitude/10.0f, point->value*10.0f/maxValue, item->pos->latitude/10.0f);
+            glEnd();
+        }
+    }
 
-    int xPixels = infoList.size();
-    qDebug() << xPixels;
 }

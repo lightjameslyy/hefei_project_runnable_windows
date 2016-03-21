@@ -184,7 +184,6 @@ void MainWindow::on_groupBox_clicked()
 void MainWindow::on_btn_3DDisplay_clicked()
 {
     QString dataDir;
-
     dataDir = QFileDialog::getExistingDirectory(
                 this,
                 tr("Open Directory"),
@@ -192,8 +191,19 @@ void MainWindow::on_btn_3DDisplay_clicked()
                 QFileDialog::ShowDirsOnly|QFileDialog::DontResolveSymlinks
                 );
 
-    MyGLWidget *w = new MyGLWidget(dataDir);
-    w->resize(1000,800);
-    w->show();
-    qDebug() << dataDir;
+    QDir dir(dataDir);
+    QFileInfoList infoList = dir.entryInfoList(QDir::Files|QDir::NoDotAndDotDot);
+
+//    qDebug()<<infoList[0].absoluteFilePath().right(4);
+    if (infoList.size() > 0 &&
+            infoList[0].absoluteFilePath().right(4) == "pmpl") {
+        MyGLWidget *w = new MyGLWidget(dataDir);
+        w->get3DDataParam(infoList);        //这句之后w->data3D赋值完毕
+        w->resize(1000,800);
+
+        w->show();
+    }
+
+//    qDebug() << dataDir;
+
 }

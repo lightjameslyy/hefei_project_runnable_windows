@@ -1014,6 +1014,17 @@ ColorMap::FILE_TYPE MapWindow::getFiletype() const
 
 void MapWindow::on_captureButton_clicked()
 {
-    QPixmap capture = this->grab(this->rect());
-    capture.save("/Users/lightjames/Desktop/a.png","png");
+    int fileNameLength = dataDir.size() - dataDir.lastIndexOf('/')-1;
+    QString defaultFileName = dataDir.right(fileNameLength);
+    qDebug()<<defaultFileName;
+    QString fileName;
+    fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
+                               "/"+defaultFileName+".png",
+                               tr("Images (*.png *.xpm *.jpg)"));
+    if (!fileName.isNull()) {
+        qDebug()<<fileName;
+        QPixmap capture = this->grab(this->rect());
+        capture.save(fileName,"png");
+    }
+
 }
