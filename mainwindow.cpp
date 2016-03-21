@@ -191,6 +191,7 @@ void MainWindow::on_btn_3DDisplay_clicked()
                 QFileDialog::ShowDirsOnly|QFileDialog::DontResolveSymlinks
                 );
 
+<<<<<<< HEAD
     QDir dir(dataDir);
     QFileInfoList infoList = dir.entryInfoList(QDir::Files|QDir::NoDotAndDotDot);
 
@@ -204,6 +205,17 @@ void MainWindow::on_btn_3DDisplay_clicked()
         w->show();
     }
 
+=======
+    MyGLWidget *w = new MyGLWidget(dataDir);
+
+    QDir dir(dataDir);
+    QFileInfoList infoList = dir.entryInfoList(QDir::Files|QDir::NoDotAndDotDot);
+
+    w->get3DDataParam(infoList);        //现在w->data3D已经赋值完毕
+
+    w->resize(1000,800);
+    w->show();
+>>>>>>> 5cf960af6f45dfb9e9d84cba99f9db986c323e13
 //    qDebug() << dataDir;
 
 }

@@ -39,7 +39,7 @@ MyGLWidget::~MyGLWidget()
 
 void MyGLWidget::initializeGL()                         //此处开始对OpenGL进行所以设置
 {
-    glClearColor(0.0, 0.0, 0.0, 0.0);                   //白色背景
+    glClearColor(1.0, 1.0, 1.0, 0.0);                   //白色背景
     glShadeModel(GL_SMOOTH);                            //启用阴影平滑
 
     glClearDepth(1.0);                                  //设置深度缓存
@@ -281,7 +281,10 @@ void MyGLWidget::draw3D()
 
     qDebug()<<maxHeight<<maxValue;
     qDebug()<<data3D.size();
+<<<<<<< HEAD
     glLineWidth(2.0f);
+=======
+>>>>>>> 5cf960af6f45dfb9e9d84cba99f9db986c323e13
     for(auto item : data3D) {
 //        qDebug()<<item->pos->longtitude<<item->pos->latitude;
 //        glLineWidth(2.0f);
