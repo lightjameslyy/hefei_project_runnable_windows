@@ -7,11 +7,11 @@
     <x>0</x>
     <y>0</y>
     <width>1350</width>
-    <height>800</height>
+    <height>831</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>数据显示 客户端</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout_9">
@@ -224,7 +224,7 @@
             </size>
            </property>
            <attribute name="title">
-            <string>实时展示</string>
+            <string>数据展示</string>
            </attribute>
            <layout class="QVBoxLayout" name="verticalLayout_10">
             <item>
@@ -262,6 +262,39 @@
      <height>20</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>工作设置</string>
+    </property>
+    <addaction name="action_7"/>
+    <addaction name="action"/>
+    <addaction name="action_2"/>
+    <addaction name="action_3"/>
+   </widget>
+   <widget class="QMenu" name="menu_2">
+    <property name="title">
+     <string>图形显示</string>
+    </property>
+    <widget class="QMenu" name="menu_4">
+     <property name="title">
+      <string>实时采集曲线</string>
+     </property>
+     <addaction name="actionOn"/>
+     <addaction name="actionOff"/>
+    </widget>
+    <addaction name="menu_4"/>
+    <addaction name="action_5"/>
+    <addaction name="action3D"/>
+    <addaction name="action_6"/>
+   </widget>
+   <widget class="QMenu" name="menu_3">
+    <property name="title">
+     <string>文件打开</string>
+    </property>
+   </widget>
+   <addaction name="menu"/>
+   <addaction name="menu_2"/>
+   <addaction name="menu_3"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -272,6 +305,51 @@
    </attribute>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
+  <action name="action">
+   <property name="text">
+    <string>扫描功能</string>
+   </property>
+  </action>
+  <action name="action_2">
+   <property name="text">
+    <string>移动功能</string>
+   </property>
+  </action>
+  <action name="action_3">
+   <property name="text">
+    <string>间隔时间设置</string>
+   </property>
+  </action>
+  <action name="action_5">
+   <property name="text">
+    <string>连续彩图显示</string>
+   </property>
+  </action>
+  <action name="action_6">
+   <property name="text">
+    <string>图形显示设置</string>
+   </property>
+  </action>
+  <action name="action3D">
+   <property name="text">
+    <string>3D扫描图</string>
+   </property>
+  </action>
+  <action name="action_7">
+   <property name="text">
+    <string>站点录入</string>
+   </property>
+  </action>
+  <action name="actionOn">
+   <property name="text">
+    <string>on</string>
+   </property>
+  </action>
+  <action name="actionOff">
+   <property name="text">
+    <string>off</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>

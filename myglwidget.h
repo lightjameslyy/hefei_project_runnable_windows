@@ -72,9 +72,12 @@ private:
     GLfloat zoom;                                   //缩放倍数
 
     QVector<MapDataFormat*> data3D;                  //所有数据
+    QList<int> uniquePosIndex;
     int maxHeight = 0;
     double maxValue = 0;
     QString dataDir = "";
+//    double minLongtitude = 180.0;
+//    double minLatitude = 180.0;
 
     void drawAxis();
     void draw3D();

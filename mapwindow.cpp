@@ -2,12 +2,14 @@
 #include "ui_mapwindow.h"
 #include "qtimer.h"
 #include "mainwindow.h"
+#include <string>
+#include <algorithm>
 
 MapWindow::MapWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MapWindow)
 {
-//    qDebug()<<this->parent();
+//    qDebug()<<(this->isRealTime = ((MainWindow*)this->parent())->getIsRealTime());
     ui->setupUi(this);
     setWindowFlags(Qt::CustomizeWindowHint );
     this->list.push_back(QVector<QVector<DataFormat*> >());
@@ -71,24 +73,26 @@ void MapWindow::plot(QString dataDir, ColorMap::FILE_TYPE filetype, bool isRealt
     ui->customPlot->replot();
 
 
-    //设置tooltip 响应
+//    //设置tooltip 响应
 //    QTimer *toolTipTimer = new QTimer(this);
 //    connect(toolTipTimer, SIGNAL(timeout()),this, SLOT(showToolTip()));
 //    toolTipTimer->start(1500);
 
 }
 
-bool MapWindow::PMPLAxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, int &yEnd, int &ySize, QFileInfoList list, int tunnelCount)
+bool MapWindow::PMPLAxisParam(int tunnelCount)
 {
+    QDir dir(this->dataDir);
+    QFileInfoList infoList = dir.entryInfoList(QDir::Files|QDir::NoDotAndDotDot);
     //x坐标相关参数
-    xSize = list.size();
-    uint startTime = this->getTimeFromFileName(list[0].absoluteFilePath());
-    uint endTime = this->getTimeFromFileName(list[list.size() - 1].absoluteFilePath());
+    xSize = infoList.size();
+    uint startTime = this->getTimeFromFileName(infoList[0].absoluteFilePath());
+    uint endTime = this->getTimeFromFileName(infoList[infoList.size() - 1].absoluteFilePath());
     xStart = 0;
     xEnd = (endTime - startTime) / 3600;
 
     //y坐标相关参数
-    QString path = list[0].absoluteFilePath();
+    QString path = infoList[0].absoluteFilePath();
     QFile file(path);
     this->getTimeFromFileName(path);
     if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -121,10 +125,9 @@ bool MapWindow::PMPLAxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, i
     return true;
 }
 
-bool MapWindow::CLHAxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, int &yEnd, int &ySize, QString path/*QFileInfoList list*/)
+bool MapWindow::CLHAxisParam()
 {
-//    QString path = list[0].absoluteFilePath();
-    QFile file(path);
+    QFile file(this->dataDir);
     if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         qDebug()<<"文件未找到";
@@ -158,7 +161,7 @@ bool MapWindow::CLHAxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, in
             in >>height;
             heights.push_back((int)height);
         }
-        endTime = getTimeFromCLHFileAndEntry(path, time_hhmmss);
+        endTime = getTimeFromCLHFileAndEntry(this->dataDir, time_hhmmss);
         if(i == 1)
             startTime = endTime;
 
@@ -180,17 +183,19 @@ bool MapWindow::CLHAxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, in
     return true;
 }
 
-bool MapWindow::UGM3AxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, int &yEnd, int &ySize, QFileInfoList list)
+bool MapWindow::UGM3AxisParam()
 {
+    QDir dir(this->dataDir);
+    QFileInfoList infoList = dir.entryInfoList(QDir::Files|QDir::NoDotAndDotDot);
     //x坐标相关参数
-    xSize = list.size();
-    uint startTime = this->getTimeFromFileName(list[0].absoluteFilePath());
-    uint endTime = this->getTimeFromFileName(list[list.size() - 1].absoluteFilePath());
+    xSize = infoList.size();
+    uint startTime = this->getTimeFromFileName(infoList[0].absoluteFilePath());
+    uint endTime = this->getTimeFromFileName(infoList[infoList.size() - 1].absoluteFilePath());
     xStart = 0;
     xEnd = (endTime - startTime) / 3600;
 
     //y坐标相关参数
-    QString path = list[0].absoluteFilePath();
+    QString path = infoList[0].absoluteFilePath();
     QFile file(path);
     this->getTimeFromFileName(path);
     if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -221,17 +226,19 @@ bool MapWindow::UGM3AxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, i
     return true;
 }
 
-bool MapWindow::PMPLRAxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, int &yEnd, int &ySize, QFileInfoList list)
+bool MapWindow::PMPLRAxisParam()
 {
+    QDir dir(this->dataDir);
+    QFileInfoList infoList = dir.entryInfoList(QDir::Files|QDir::NoDotAndDotDot);
     //x坐标相关参数
-    xSize = list.size();
-    uint startTime = this->getTimeFromFileName(list[0].absoluteFilePath());
-    uint endTime = this->getTimeFromFileName(list[list.size() - 1].absoluteFilePath());
+    xSize = infoList.size();
+    uint startTime = this->getTimeFromFileName(infoList[0].absoluteFilePath());
+    uint endTime = this->getTimeFromFileName(infoList[infoList.size() - 1].absoluteFilePath());
     xStart = 0;
     xEnd = (endTime - startTime) / 3600;
 
     //y坐标相关参数
-    QString path = list[0].absoluteFilePath();
+    QString path = infoList[0].absoluteFilePath();
     QFile file(path);
     this->getTimeFromFileName(path);
     if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -262,10 +269,9 @@ bool MapWindow::PMPLRAxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, 
     return true;
 }
 
-bool MapWindow::LAYERAxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, int &yEnd, int &ySize, QString path/*QFileInfoList list*/)
+bool MapWindow::LAYERAxisParam()
 {
-//    QString path = list[0].absoluteFilePath();
-    QFile file(path);
+    QFile file(this->dataDir);
     if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         qDebug()<<"文件未找到";
@@ -287,20 +293,15 @@ bool MapWindow::LAYERAxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, 
     while (in.atEnd() == false)
     {
         i++;
-
         DataFormat *df;
         QString time_yyMMddhhmmss;
         int height;
-
         in >>time_yyMMddhhmmss >>height;
-
         endTime = getTimeFromLAYEREntry(time_yyMMddhhmmss);
         if(i == 1)
             startTime = endTime;
-
         if(yEnd < height)
             yEnd = (int)height;
-
         df = new DataFormat(endTime, height);
         vector.push_back(df);
         in.readLine();
@@ -310,24 +311,23 @@ bool MapWindow::LAYERAxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, 
 //    qDebug()<<i;
     xSize = i;
     xEnd = (endTime - startTime) / 3600;
-
     ySize = yEnd;  //1米 每 像素
-
     return true;
-
 }
 
-bool MapWindow::EXTAxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, int &yEnd, int &ySize, QFileInfoList list)
+bool MapWindow::EXTAxisParam()
 {
+    QDir dir(this->dataDir);
+    QFileInfoList infoList = dir.entryInfoList(QDir::Files|QDir::NoDotAndDotDot);
     //x坐标相关参数
-    xSize = list.size();
-    uint startTime = this->getTimeFromFileName(list[0].absoluteFilePath());
-    uint endTime = this->getTimeFromFileName(list[list.size() - 1].absoluteFilePath());
+    xSize = infoList.size();
+    uint startTime = this->getTimeFromFileName(infoList[0].absoluteFilePath());
+    uint endTime = this->getTimeFromFileName(infoList[infoList.size() - 1].absoluteFilePath());
     xStart = 0;
     xEnd = (endTime - startTime) / 3600;
 
     //y坐标相关参数
-    QString path = list[0].absoluteFilePath();
+    QString path = infoList[0].absoluteFilePath();
     QFile file(path);
     this->getTimeFromFileName(path);
     if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -403,8 +403,6 @@ uint MapWindow::getTimeFromLAYEREntry(QString time_yyMMddhhmmss)
      */
 }
 
-
-
 void MapWindow::colorMapClicked(QCPAbstractPlottable *plottable, QMouseEvent *event)
 {
     //qDebug()<<event->globalX()<<event->globalY();
@@ -463,13 +461,11 @@ void MapWindow::drawSingleLine(QVector<DataFormat *> &vec)
 
 }
 
-
 void MapWindow::showToolTip()
 {
-    qDebug()<<QCursor::pos().x()<<QCursor::pos().y();
-    QToolTip::showText(QCursor::pos(), "hahaha");
+//    qDebug()<<QCursor::pos().x()<<QCursor::pos().y();
+//    QToolTip::showText(QCursor::pos(), "hahaha");
 }
-
 
 void MapWindow::drawPMPLMap(int tunnelCount , bool isRealTime , int samplingGap)
 {
@@ -488,8 +484,134 @@ void MapWindow::drawPMPLMap(int tunnelCount , bool isRealTime , int samplingGap)
     ui->customPlot->yAxis->setLabel("高度（m）");
 
     //获取横纵坐标相关参数
-    int xStart, xEnd, xSize, ySize, yStart, yEnd;
-    this->PMPLAxisParam(xStart, xEnd, xSize, yStart, yEnd, ySize, infoList);
+//    int xStart, xEnd, xSize, ySize, yStart, yEnd;
+    this->PMPLAxisParam();
+
+    // set up the QCPColorMap:
+    QCPColorMap *colorMap = new QCPColorMap(ui->customPlot->xAxis, ui->customPlot->yAxis);
+    ui->customPlot->addPlottable(colorMap);
+
+    //注册该显示图的点击处理函数
+    connect(ui->customPlot,    SIGNAL(plottableClick(QCPAbstractPlottable*,QMouseEvent*)),
+       this, SLOT(colorMapClicked(QCPAbstractPlottable*,QMouseEvent*)));
+    connect(ui->customPlot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(customPlotClicked(QMouseEvent*)));
+
+    colorMap->data()->setSize(xSize, ySize); // we want the color map to have nx * ny data points
+    colorMap->data()->setRange(QCPRange(xStart, xEnd), QCPRange(yStart, yEnd)); // and span the coordinate range -4..4 in both key (x) and value (y) dimensions
+
+    // now we assign some data, by accessing the QCPColorMapData instance of the color map:
+    for (int xIndex=0; xIndex<xSize; ++xIndex)
+    {
+        QFile file(infoList[xIndex].absoluteFilePath());
+        uint time = this->getTimeFromFileName(infoList[xIndex].absoluteFilePath());
+        DataFormat *df;
+        QVector<DataFormat*> vector;
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+             return;
+        QTextStream in(&file);
+        in.readLine();
+        in.readLine();
+        in.readLine();
+        int yIndex = 0;
+        while(in.atEnd() == false)
+        {
+            int i;
+            double d;
+            in>>i>>d;
+//            qDebug()<<d;
+            df = new DataFormat(time, i, d);
+            vector.push_back(df);
+            colorMap->data()->setCell(xIndex, yIndex, d);
+            yIndex++;
+            in.readLine();
+        }
+        file.close();
+        this->list[0].push_back(vector);
+    }
+
+    colorMap->rescaleDataRange();
+    ui->customPlot->rescaleAxes();
+    ui->customPlot->replot();
+
+    this->lastFilePos = xSize;
+//    this->lastReadFile = infoList[xSize - 1].absoluteFilePath();
+
+    if(isRealTime)
+    {
+        QTimer *dataTimer = new QTimer(this);
+        connect(dataTimer, SIGNAL(timeout()), this, SLOT(updatePMPLMap()));
+        dataTimer->start(samplingGap);
+    }
+}
+
+void MapWindow::drawCLHMap(bool isRealTime, int samplingGap)
+{
+    ui->label->setText("clh");
+    //得到.clh文件路径
+    QString path = this->dataDir;
+
+    ui->singleLinePlot->setVisible(false);
+
+    // configure axis rect:
+    ui->customPlot->setInteractions(QCP::iRangeDrag|QCP::iRangeZoom); // this will also allow rescaling the color scale by dragging/zooming
+    ui->customPlot->axisRect()->setupFullAxesBox(true);
+    ui->customPlot->xAxis->setLabel("时间");
+    ui->customPlot->yAxis->setLabel("高度（m）");
+//    ui->customPlot->setBackground(QBrush(Qt::white));
+
+    //获取横纵坐标相关参数
+//    int xStart, xEnd, xSize, ySize, yStart, yEnd;
+    this->CLHAxisParam();
+    lastFilePos = xSize;
+
+    // set up the QCPColorMap:
+    QCPColorMap *colorMap = new QCPColorMap(ui->customPlot->xAxis, ui->customPlot->yAxis);
+    ui->customPlot->addPlottable(colorMap);
+
+//    colorMap->setPen(QPen(Qt::white));
+//    colorMap->setBrush(Qt::white);
+
+    colorMap->data()->setSize(xSize, ySize); // we want the color map to have nx * ny data points
+    colorMap->data()->setRange(QCPRange(xStart, xEnd), QCPRange(yStart, yEnd)); // and span the coordinate range -4..4 in both key (x) and value (y) dimensions
+
+    for(int xIndex = 0; xIndex < xSize; xIndex++)
+    {
+        DataFormat *df = this->list[0][0][xIndex];
+        QVector<int> heights = df->heights;
+        for(int i = 0; i < heights.length(); i++)
+            colorMap->data()->setCell(xIndex, heights[i] / 30, -1);
+    }
+    ui->customPlot->rescaleAxes();
+    ui->customPlot->replot();
+
+    if(isRealTime)
+    {
+        QTimer *dataTimer = new QTimer(this);
+        connect(dataTimer, SIGNAL(timeout()), this, SLOT(updateCLHMap()));
+        dataTimer->start(samplingGap);
+    }
+}
+
+void MapWindow::drawUGM3Map(bool isRealTime, int samplingGap)
+{
+    ui->label->setText("ugm3");
+
+    //根据dir得到.ugm3文件列表;
+    QDir dir(this->dataDir);
+    QFileInfoList infoList = dir.entryInfoList(QDir::Files|QDir::NoDotAndDotDot);
+
+    ui->singleLinePlot->setVisible(false);
+
+    // configure axis rect:
+    ui->customPlot->setInteractions(QCP::iRangeDrag|QCP::iRangeZoom); // this will also allow rescaling the color scale by dragging/zooming
+    ui->customPlot->axisRect()->setupFullAxesBox(true);
+    ui->customPlot->xAxis->setLabel("时间");
+    ui->customPlot->yAxis->setLabel("高度（m）");
+    //ui->customPlot->setBackground(QBrush(QColor(0, 255, 0, 100)));
+
+    //获取横纵坐标相关参数
+//    int xStart, xEnd, xSize, ySize, yStart, yEnd;
+    this->UGM3AxisParam();
 
     // set up the QCPColorMap:
     QCPColorMap *colorMap = new QCPColorMap(ui->customPlot->xAxis, ui->customPlot->yAxis);
@@ -519,7 +641,6 @@ void MapWindow::drawPMPLMap(int tunnelCount , bool isRealTime , int samplingGap)
             int i;
             double d;
             in>>i>>d;
-//            qDebug()<<d;
             df = new DataFormat(time, i, d);
             vector.push_back(df);
             colorMap->data()->setCell(xIndex, yIndex, d);
@@ -529,132 +650,17 @@ void MapWindow::drawPMPLMap(int tunnelCount , bool isRealTime , int samplingGap)
         file.close();
         this->list[0].push_back(vector);
     }
+    this->lastFilePos = xSize;
+//    this->lastReadFile = infoList[xSize - 1].absoluteFilePath();
 
-//    colorMap->rescaleDataRange();
-//    ui->customPlot->rescaleAxes();
-//    ui->customPlot->replot();
-
-    this->lastReadFile = infoList[xSize - 1].absoluteFilePath();
-
-    if(isRealTime)
-    {
-        QTimer *dataTimer = new QTimer(this);
-        connect(dataTimer, SIGNAL(timeout()), this, SLOT(updateUpdatePMPLMap()));
-        dataTimer->start(samplingGap);
-    }
-}
-
-void MapWindow::drawCLHMap(bool isRealtime, int samplingGap)
-{
-    ui->label->setText("clh");
-    //得到.clh文件路径
-    QString path = this->dataDir;
-//    QDir dir(this->dataDir);
-//    QFileInfoList infoList = dir.entryInfoList(QDir::Files|QDir::NoDotAndDotDot);
-
-
-    ui->singleLinePlot->setVisible(false);
-
-    // configure axis rect:
-    ui->customPlot->setInteractions(QCP::iRangeDrag|QCP::iRangeZoom); // this will also allow rescaling the color scale by dragging/zooming
-    ui->customPlot->axisRect()->setupFullAxesBox(true);
-    ui->customPlot->xAxis->setLabel("时间");
-    ui->customPlot->yAxis->setLabel("高度（m）");
-//    ui->customPlot->setBackground(QBrush(Qt::white));
-
-    //获取横纵坐标相关参数
-    int xStart, xEnd, xSize, ySize, yStart, yEnd;
-    this->CLHAxisParam(xStart, xEnd, xSize, yStart, yEnd, ySize, path);
-
-    // set up the QCPColorMap:
-    QCPColorMap *colorMap = new QCPColorMap(ui->customPlot->xAxis, ui->customPlot->yAxis);
-    ui->customPlot->addPlottable(colorMap);
-
-//    colorMap->setPen(QPen(Qt::white));
-//    colorMap->setBrush(Qt::white);
-
-    colorMap->data()->setSize(xSize, ySize); // we want the color map to have nx * ny data points
-    colorMap->data()->setRange(QCPRange(xStart, xEnd), QCPRange(yStart, yEnd)); // and span the coordinate range -4..4 in both key (x) and value (y) dimensions
-
-    for(int xIndex = 0; xIndex < xSize; xIndex++)
-    {
-        DataFormat *df = this->list[0][0][xIndex];
-        QVector<int> heights = df->heights;
-        for(int i = 0; i < heights.length(); i++)
-            colorMap->data()->setCell(xIndex, heights[i] / 30, -1);
-    }
-
-//    colorMap->rescaleDataRange();
-//    ui->customPlot->rescaleAxes();
-//    ui->customPlot->replot();
-
-
-}
-
-void MapWindow::drawUGM3Map(bool isRealTime, int samplingGap)
-{
-    ui->label->setText("ugm3");
-
-    //根据dir得到.ugm3文件列表;
-    QDir dir(this->dataDir);
-    QFileInfoList infoList = dir.entryInfoList(QDir::Files|QDir::NoDotAndDotDot);
-
-    ui->singleLinePlot->setVisible(false);
-
-    // configure axis rect:
-    ui->customPlot->setInteractions(QCP::iRangeDrag|QCP::iRangeZoom); // this will also allow rescaling the color scale by dragging/zooming
-    ui->customPlot->axisRect()->setupFullAxesBox(true);
-    ui->customPlot->xAxis->setLabel("时间");
-    ui->customPlot->yAxis->setLabel("高度（m）");
-    //ui->customPlot->setBackground(QBrush(QColor(0, 255, 0, 100)));
-
-    //获取横纵坐标相关参数
-    int xStart, xEnd, xSize, ySize, yStart, yEnd;
-    this->UGM3AxisParam(xStart, xEnd, xSize, yStart, yEnd, ySize, infoList);
-
-    // set up the QCPColorMap:
-    QCPColorMap *colorMap = new QCPColorMap(ui->customPlot->xAxis, ui->customPlot->yAxis);
-    ui->customPlot->addPlottable(colorMap);
-
-    //注册该显示图的点击处理函数
-    connect(ui->customPlot,    SIGNAL(plottableClick(QCPAbstractPlottable*,QMouseEvent*)),
-       this, SLOT(colorMapClicked(QCPAbstractPlottable*,QMouseEvent*)));
-    connect(ui->customPlot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(customPlotClicked(QMouseEvent*)));
-
-    colorMap->data()->setSize(xSize, ySize); // we want the color map to have nx * ny data points
-    colorMap->data()->setRange(QCPRange(xStart, xEnd), QCPRange(yStart, yEnd)); // and span the coordinate range -4..4 in both key (x) and value (y) dimensions
-
-    // now we assign some data, by accessing the QCPColorMapData instance of the color map:
-    for (int xIndex=0; xIndex<xSize; ++xIndex)
-    {
-        QFile file(infoList[xIndex].absoluteFilePath());
-        uint time = this->getTimeFromFileName(infoList[xIndex].absoluteFilePath());
-        DataFormat *df;
-        QVector<DataFormat*> vector;
-        if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-             return;
-        QTextStream in(&file);
-        in.readLine();
-        int yIndex = 1;
-        while(in.readLine() != NULL)
-        {
-            int i;
-            double d;
-            in>>i>>d;
-            df = new DataFormat(time, i, d);
-            vector.push_back(df);
-            colorMap->data()->setCell(xIndex, yIndex, d);
-            yIndex++;
-        }
-        file.close();
-        this->list[0].push_back(vector);
-    }
-    this->lastReadFile = infoList[xSize - 1].absoluteFilePath();
+    colorMap->rescaleDataRange();
+    ui->customPlot->rescaleAxes();
+    ui->customPlot->replot();
 
     if(isRealTime)
     {
         QTimer *dataTimer = new QTimer(this);
-        connect(dataTimer, SIGNAL(timeout()), this, SLOT(updateUpdatePMPLMap()));
+        connect(dataTimer, SIGNAL(timeout()), this, SLOT(updateUGM3Map()));
         dataTimer->start(samplingGap);
     }
 }
@@ -677,8 +683,8 @@ void MapWindow::drawPMPLRMap(bool isRealTime, int samplingGap)
     //ui->customPlot->setBackground(QBrush(QColor(0, 255, 0, 100)));
 
     //获取横纵坐标相关参数
-    int xStart, xEnd, xSize, ySize, yStart, yEnd;
-    this->PMPLRAxisParam(xStart, xEnd, xSize, yStart, yEnd, ySize, infoList);
+//    int xStart, xEnd, xSize, ySize, yStart, yEnd;
+    this->PMPLRAxisParam();
 
     // set up the QCPColorMap:
     QCPColorMap *colorMap = new QCPColorMap(ui->customPlot->xAxis, ui->customPlot->yAxis);
@@ -702,9 +708,8 @@ void MapWindow::drawPMPLRMap(bool isRealTime, int samplingGap)
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
              return;
         QTextStream in(&file);
-        in.readLine();
-        int yIndex = 1;
-        while(in.readLine() != NULL)
+        int yIndex = 0;
+        while(in.atEnd() == false)
         {
             int i;
             double d;
@@ -713,30 +718,29 @@ void MapWindow::drawPMPLRMap(bool isRealTime, int samplingGap)
             vector.push_back(df);
             colorMap->data()->setCell(xIndex, yIndex, d);
             yIndex++;
+            in.readLine();
         }
         file.close();
         this->list[0].push_back(vector);
     }
-    this->lastReadFile = infoList[xSize - 1].absoluteFilePath();
+    colorMap->rescaleDataRange();
+    ui->customPlot->rescaleAxes();
+    ui->customPlot->replot();
+
+    this->lastFilePos = xSize;
+//    this->lastReadFile = infoList[xSize - 1].absoluteFilePath();
 
     if(isRealTime)
     {
         QTimer *dataTimer = new QTimer(this);
-        connect(dataTimer, SIGNAL(timeout()), this, SLOT(updateUpdatePMPLMap()));
+        connect(dataTimer, SIGNAL(timeout()), this, SLOT(updatePMPLRMap()));
         dataTimer->start(samplingGap);
     }
 }
 
-void MapWindow::drawLAYERMap(bool isRealtime, int samplingGap)
+void MapWindow::drawLAYERMap(bool isRealTime, int samplingGap)
 {
     ui->label->setText("layer");
-
-    //根据dir得到.layer文件路径
-    QString path = this->dataDir;
-//    QDir dir(this->dataDir);
-//    QFileInfoList infoList = dir.entryInfoList(QDir::Files|QDir::NoDotAndDotDot);
-
-
     ui->singleLinePlot->setVisible(false);
 
     // configure axis rect:
@@ -747,9 +751,9 @@ void MapWindow::drawLAYERMap(bool isRealtime, int samplingGap)
 //    ui->customPlot->setBackground(QBrush(Qt::white));
 
     //获取横纵坐标相关参数
-    int xStart, xEnd, xSize, ySize, yStart, yEnd;
-    this->LAYERAxisParam(xStart, xEnd, xSize, yStart, yEnd, ySize, path);
-
+//    int xStart, xEnd, xSize, ySize, yStart, yEnd;
+    this->LAYERAxisParam();
+    this->lastFilePos = xSize;
 
     QVector<double> x(xSize),y(xSize);
     for(int i = 0; i < xSize; i++)
@@ -766,9 +770,16 @@ void MapWindow::drawLAYERMap(bool isRealtime, int samplingGap)
     ui->customPlot->yAxis->setRange(yStart, yEnd);
     ui->customPlot->graph(0)->rescaleAxes(true);
     ui->customPlot->replot();
+
+    if(isRealTime)
+    {
+        QTimer *dataTimer = new QTimer(this);
+        connect(dataTimer, SIGNAL(timeout()), this, SLOT(updateLAYERMap()));
+        dataTimer->start(samplingGap);
+    }
 }
 
-void MapWindow::drawEXTMap(bool isRealtime, int samplingGap)
+void MapWindow::drawEXTMap(bool isRealTime, int samplingGap)
 {
     ui->label->setText("ext");
 
@@ -786,8 +797,8 @@ void MapWindow::drawEXTMap(bool isRealtime, int samplingGap)
     ui->customPlot->yAxis->setLabel("高度（m）");
 
     //获取横纵坐标相关参数
-    int xStart, xEnd, xSize, ySize, yStart, yEnd;
-    this->EXTAxisParam(xStart, xEnd, xSize, yStart, yEnd, ySize, infoList);
+//    int xStart, xEnd, xSize, ySize, yStart, yEnd;
+    this->EXTAxisParam();
 
     // set up the QCPColorMap:
     QCPColorMap *colorMap = new QCPColorMap(ui->customPlot->xAxis, ui->customPlot->yAxis);
@@ -811,7 +822,7 @@ void MapWindow::drawEXTMap(bool isRealtime, int samplingGap)
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
              return;
         QTextStream in(&file);
-        int yIndex = 1;
+        int yIndex = 0;
         while(in.atEnd() == false)
         {
             int i;
@@ -828,22 +839,19 @@ void MapWindow::drawEXTMap(bool isRealtime, int samplingGap)
         this->list[0].push_back(vector);
     }
 
-//    colorMap->rescaleDataRange();
-//    ui->customPlot->rescaleAxes();
-//    ui->customPlot->replot();
+    this->lastFilePos = xSize;
+    colorMap->rescaleDataRange();
+    ui->customPlot->rescaleAxes();
+    ui->customPlot->replot();
 
-    this->lastReadFile = infoList[xSize - 1].absoluteFilePath();
-    bool bl = isRealtime;
+//    this->lastReadFile = infoList[xSize - 1].absoluteFilePath();
 
-    if(bl)
+    if(isRealTime)
     {
         QTimer *dataTimer = new QTimer(this);
-        connect(dataTimer, SIGNAL(timeout()), this, SLOT(updateUpdatePMPLMap()));
+        connect(dataTimer, SIGNAL(timeout()), this, SLOT(updateEXTMap()));
         dataTimer->start(samplingGap);
     }
-
-
-
 }
 
 void MapWindow::setGradientScale(QCPColorMap *colorMap )
@@ -872,42 +880,32 @@ void MapWindow::setGradientScale(QCPColorMap *colorMap )
 
 void MapWindow::updatePMPLMap()
 {
-    qDebug()<<"updateColorMap";
-    QDir dir(dataDir);
+    QDir dir(this->dataDir);
     QFileInfoList infoList = dir.entryInfoList(QDir::Files|QDir::NoDotAndDotDot);
-    if(this->lastReadFile.compare(infoList[infoList.size() - 1].absoluteFilePath()) >= 0)
-        return;
+    if (infoList.size() <= xSize) return;
+    qDebug()<<"update PMPL";
+//    if(this->lastReadFile.compare(infoList[infoList.size() - 1].absoluteFilePath()) >= 0)
+//        return;
 
-
-    qDebug()<<"有文件更新";
     QCPColorMap *colorMap = (QCPColorMap*)ui->customPlot->plottable(0);
-    colorMap->data()->clear();
-    colorMap->clearData();
-    ui->customPlot->rescaleAxes();
-    ui->customPlot->replot();
-
-
 
     //获取横纵坐标相关参数
-    int xStart, xEnd, xSize, ySize, yStart, yEnd;
-    this->PMPLAxisParam(xStart, xEnd, xSize, yStart, yEnd, ySize, infoList);
+//    int newxStart, newxEnd, newxSize, newySize, newyStart, newyEnd;
+    this->PMPLAxisParam();
+    infoList = dir.entryInfoList(QDir::Files|QDir::NoDotAndDotDot);
     // set up the QCPColorMap:
-
     colorMap->data()->setSize(xSize, ySize); // we want the color map to have nx * ny data points
-    colorMap->data()->setRange(QCPRange(xStart, xEnd*2), QCPRange(yStart, yEnd)); // and span the coordinate range -4..4 in both key (x) and value (y) dimensions
+    colorMap->data()->setRange(QCPRange(xStart, xEnd), QCPRange(yStart, yEnd)); // and span the coordinate range -4..4 in both key (x) and value (y) dimensions
     for (int xIndex=0; xIndex<xSize; ++xIndex)
     {
-        QString filePath = infoList[xIndex].absoluteFilePath();
-        if(filePath.compare(this->lastReadFile) >= 0)
-        {
+        if (xIndex < lastFilePos) {
             QVector<DataFormat*> vector = this->list[0][xIndex];
-            for(int i = 0; i < vector.size(); i++)
-            {
+            for (int i = 0; i < vector.size(); ++i) {
                 colorMap->data()->setCell(xIndex, i, vector[i]->value);
             }
         }
-        else
-        {
+        else {
+            QString filePath = infoList[xIndex].absoluteFilePath();
             QFile file(filePath);
             QVector<DataFormat*> vector;
             DataFormat* df;
@@ -915,8 +913,10 @@ void MapWindow::updatePMPLMap()
                  return;
             QTextStream in(&file);
             in.readLine();
-            int yIndex = 1;
-            while(in.readLine() != NULL)
+            in.readLine();
+            in.readLine();
+            int yIndex = 0;
+            while(in.atEnd() == false)
             {
                 int i;
                 double d;
@@ -925,40 +925,226 @@ void MapWindow::updatePMPLMap()
                 df = new DataFormat(this->getTimeFromFileName(filePath), i, d);
                 vector.push_back(df);
                 yIndex++;
+                in.readLine();
             }
             this->list[0].push_back(vector);
             file.close();
         }
     }
-    this->lastReadFile = infoList[infoList.size() - 1].absoluteFilePath();
-
+    this->lastFilePos = xSize;
     ui->customPlot->rescaleAxes();
     ui->customPlot->replot();
+    qDebug() <<"PMPL updated";
 }
 
 void MapWindow::updateCLHMap()
 {
+    this->list[0].clear();
+    CLHAxisParam();
+    if (xSize <= lastFilePos) return;
+    qDebug() << "update CLH";
+    QCPColorMap *colorMap = (QCPColorMap*)ui->customPlot->plottable(0);
+    colorMap->data()->setSize(xSize, ySize); // we want the color map to have nx * ny data points
+    colorMap->data()->setRange(QCPRange(xStart, xEnd), QCPRange(yStart, yEnd)); // and span the coordinate range -4..4 in both key (x) and value (y) dimensions
 
+    for(int xIndex = 0; xIndex < xSize; xIndex++)
+    {
+        DataFormat *df = this->list[0][0][xIndex];
+        QVector<int> heights = df->heights;
+        for(int i = 0; i < heights.length(); i++)
+            colorMap->data()->setCell(xIndex, heights[i] / 30, -1);
+    }
+    this->lastFilePos = xSize;
+    ui->customPlot->rescaleAxes();
+    ui->customPlot->replot();
+    qDebug() <<"CLH updated";
 }
 
 void MapWindow::updateEXTMap()
 {
+    QDir dir(this->dataDir);
+    QFileInfoList infoList = dir.entryInfoList(QDir::Files|QDir::NoDotAndDotDot);
+    if (infoList.size() <= xSize) return;
+    qDebug()<<"update EXT";
 
+    QCPColorMap *colorMap = (QCPColorMap*)ui->customPlot->plottable(0);
+
+    //获取横纵坐标相关参数
+//    int newxStart, newxEnd, newxSize, newySize, newyStart, newyEnd;
+    this->EXTAxisParam();
+    infoList = dir.entryInfoList(QDir::Files|QDir::NoDotAndDotDot);
+    // set up the QCPColorMap:
+    colorMap->data()->setSize(xSize, ySize); // we want the color map to have nx * ny data points
+    colorMap->data()->setRange(QCPRange(xStart, xEnd), QCPRange(yStart, yEnd)); // and span the coordinate range -4..4 in both key (x) and value (y) dimensions
+    for (int xIndex=0; xIndex<xSize; ++xIndex)
+    {
+        if (xIndex < lastFilePos) {
+            QVector<DataFormat*> vector = this->list[0][xIndex];
+            for (int i = 0; i < vector.size(); ++i) {
+                colorMap->data()->setCell(xIndex, i, vector[i]->value);
+            }
+        }
+        else {
+            QString filePath = infoList[xIndex].absoluteFilePath();
+            QFile file(filePath);
+            QVector<DataFormat*> vector;
+            DataFormat* df;
+            if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+                 return;
+            QTextStream in(&file);
+            int yIndex = 0;
+            while(in.atEnd() == false)
+            {
+                int i;
+                double d;
+                in>>i>>d;
+                colorMap->data()->setCell(xIndex, yIndex, d);
+                df = new DataFormat(this->getTimeFromFileName(filePath), i, d);
+                vector.push_back(df);
+                yIndex++;
+                in.readLine();
+            }
+            this->list[0].push_back(vector);
+            file.close();
+        }
+    }
+    this->lastFilePos = xSize;
+    ui->customPlot->rescaleAxes();
+    ui->customPlot->replot();
+    qDebug() <<"EXT updated";
 }
 
 void MapWindow::updateLAYERMap()
 {
+    qDebug() << "enter updateLAYERMap";
+    this->list[0].clear();
+    LAYERAxisParam();
+    qDebug() << xSize << lastFilePos;
+    if (xSize <= lastFilePos) return;
+    lastFilePos = xSize;
+    qDebug() << "update LAYER";
+    QVector<double> x(xSize),y(xSize);
+    for(int i = 0; i < xSize; i++)
+    {
+        x[i] = (double)i;
+        y[i] = (double)this->list[0][0][i]->height;
+    }
 
+    ui->customPlot->graph(0)->data()->clear();
+    ui->customPlot->graph(0)->setData(x,y);
+    ui->customPlot->graph(0)->setPen(QPen(Qt::red));
+    ui->customPlot->xAxis->setRange(xStart, xEnd);
+    ui->customPlot->yAxis->setRange(yStart, yEnd);
+    ui->customPlot->graph(0)->rescaleAxes(true);
+    ui->customPlot->replot();
+    qDebug() <<"LAYER updated";
 }
 
 void MapWindow::updatePMPLRMap()
 {
+    QDir dir(this->dataDir);
+    QFileInfoList infoList = dir.entryInfoList(QDir::Files|QDir::NoDotAndDotDot);
+    if (infoList.size() <= xSize) return;
+    qDebug()<<"update PMPLR";
+//    qDebug() << this->dataDir;
+    QCPColorMap *colorMap = (QCPColorMap*)ui->customPlot->plottable(0);
 
+    //获取横纵坐标相关参数
+//    int newxStart, newxEnd, newxSize, newySize, newyStart, newyEnd;
+    this->PMPLRAxisParam();
+    infoList = dir.entryInfoList(QDir::Files|QDir::NoDotAndDotDot);
+    // set up the QCPColorMap:
+    colorMap->data()->setSize(xSize, ySize); // we want the color map to have nx * ny data points
+    colorMap->data()->setRange(QCPRange(xStart, xEnd), QCPRange(yStart, yEnd)); // and span the coordinate range -4..4 in both key (x) and value (y) dimensions
+    for (int xIndex=0; xIndex<xSize; ++xIndex)
+    {
+        if (xIndex < lastFilePos) {
+            QVector<DataFormat*> vector = this->list[0][xIndex];
+            for (int i = 0; i < vector.size(); ++i) {
+                colorMap->data()->setCell(xIndex, i, vector[i]->value);
+            }
+        }
+        else {
+            QString filePath = infoList[xIndex].absoluteFilePath();
+            QFile file(filePath);
+            QVector<DataFormat*> vector;
+            DataFormat* df;
+            if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+                 return;
+            QTextStream in(&file);
+            int yIndex = 0;
+            while(in.atEnd() == false)
+            {
+                int i;
+                double d;
+                in>>i>>d;
+                colorMap->data()->setCell(xIndex, yIndex, d);
+                df = new DataFormat(this->getTimeFromFileName(filePath), i, d);
+                vector.push_back(df);
+                yIndex++;
+                in.readLine();
+            }
+            this->list[0].push_back(vector);
+            file.close();
+        }
+    }
+    this->lastFilePos = xSize;
+    ui->customPlot->rescaleAxes();
+    ui->customPlot->replot();
+    qDebug() <<"PMPLR updated";
 }
 
 void MapWindow::updateUGM3Map()
 {
+    QDir dir(this->dataDir);
+    QFileInfoList infoList = dir.entryInfoList(QDir::Files|QDir::NoDotAndDotDot);
+    if (infoList.size() <= xSize) return;
+    qDebug()<<"update UGM3";
+    QCPColorMap *colorMap = (QCPColorMap*)ui->customPlot->plottable(0);
 
+    //获取横纵坐标相关参数
+//    int newxStart, newxEnd, newxSize, newySize, newyStart, newyEnd;
+    this->PMPLRAxisParam();
+    infoList = dir.entryInfoList(QDir::Files|QDir::NoDotAndDotDot);
+    // set up the QCPColorMap:
+    colorMap->data()->setSize(xSize, ySize); // we want the color map to have nx * ny data points
+    colorMap->data()->setRange(QCPRange(xStart, xEnd), QCPRange(yStart, yEnd)); // and span the coordinate range -4..4 in both key (x) and value (y) dimensions
+    for (int xIndex=0; xIndex<xSize; ++xIndex)
+    {
+        if (xIndex < lastFilePos) {
+            QVector<DataFormat*> vector = this->list[0][xIndex];
+            for (int i = 0; i < vector.size(); ++i) {
+                colorMap->data()->setCell(xIndex, i, vector[i]->value);
+            }
+        }
+        else {
+            QString filePath = infoList[xIndex].absoluteFilePath();
+            QFile file(filePath);
+            QVector<DataFormat*> vector;
+            DataFormat* df;
+            if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+                 return;
+            QTextStream in(&file);
+            int yIndex = 0;
+            while(in.atEnd() == false)
+            {
+                int i;
+                double d;
+                in>>i>>d;
+                colorMap->data()->setCell(xIndex, yIndex, d);
+                df = new DataFormat(this->getTimeFromFileName(filePath), i, d);
+                vector.push_back(df);
+                yIndex++;
+                in.readLine();
+            }
+            this->list[0].push_back(vector);
+            file.close();
+        }
+    }
+    this->lastFilePos = xSize;
+    ui->customPlot->rescaleAxes();
+    ui->customPlot->replot();
+    qDebug() <<"UGM3 updated";
 }
 
 void MapWindow::on_closeButton_clicked()
@@ -997,7 +1183,6 @@ void MapWindow::on_closeButton_clicked()
             qlw->takeItem(row);
         row++;
     }
-
 }
 
 void MapWindow::setFiletype(const ColorMap::FILE_TYPE &value)
@@ -1010,8 +1195,6 @@ ColorMap::FILE_TYPE MapWindow::getFiletype() const
     return filetype;
 }
 
-
-
 void MapWindow::on_captureButton_clicked()
 {
     int fileNameLength = dataDir.size() - dataDir.lastIndexOf('/')-1;
@@ -1020,11 +1203,11 @@ void MapWindow::on_captureButton_clicked()
     QString fileName;
     fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
                                "/"+defaultFileName+".png",
-                               tr("Images (*.png *.xpm *.jpg)"));
+                               tr("Images (*.png)"));
     if (!fileName.isNull()) {
         qDebug()<<fileName;
         QPixmap capture = this->grab(this->rect());
-        capture.save(fileName,"png");
+        capture.save(fileName, "png");
     }
 
 }

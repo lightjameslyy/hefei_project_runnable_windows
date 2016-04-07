@@ -45,7 +45,7 @@ class MapWindow : public QMainWindow
 public:
     explicit MapWindow(QWidget *parent = 0);
     ~MapWindow();
-    void plot(QString dataDir, ColorMap::FILE_TYPE filetype, bool isRealtime = false, int samplingGap = 0, int tunnelCount = 1);
+    void plot(QString dataDir, ColorMap::FILE_TYPE filetype, bool isRealtime = false, int samplingGap = 1000, int tunnelCount = 1);
 
     //static int HISTORY_DATA = 1;
     //static int REATIME_DATA = 2;
@@ -56,27 +56,27 @@ public:
     void drawSingleLine(QVector<DataFormat*> &vec);
 
     //绘制PMPL图像
-    void drawPMPLMap(int tunnelCount = 1, bool isRealTime = false, int samplingGap = 0);
+    void drawPMPLMap(int tunnelCount = 1, bool isRealTime = false, int samplingGap = 10000);
     //绘制UGM3
-    void drawUGM3Map(bool isRealTime = false, int samplingGap = 0);
+    void drawUGM3Map(bool isRealTime = false, int samplingGap = 10000);
     //绘制PMPLR
-    void drawPMPLRMap(bool isRealTime = false, int samplingGap = 0);
+    void drawPMPLRMap(bool isRealTime = false, int samplingGap = 10000);
     //绘制LAYER
-    void drawLAYERMap(bool isRealtime = false, int samplingGap = 0);
+    void drawLAYERMap(bool isRealTime = false, int samplingGap = 2000);
     //绘制CLH
-    void drawCLHMap(bool isRealtime = false, int samplingGap = 0);
+    void drawCLHMap(bool isRealTime = false, int samplingGap = 2000);
     //绘制EXT
-    void drawEXTMap(bool isRealtime = false, int samplingGap = 0);
+    void drawEXTMap(bool isRealTime = false, int samplingGap = 10000);
 
     /*
      * 解析PMPL图坐标轴参数，如果成功返回true，否则返回false。下面几个函数同理
      */
-    bool PMPLAxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, int &yEnd, int &ySize,QFileInfoList list, int tunnelCount = 1);
-    bool UGM3AxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, int &yEnd, int &ySize,QFileInfoList list);
-    bool PMPLRAxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, int &yEnd, int &ySize,QFileInfoList list);
-    bool LAYERAxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, int &yEnd, int &ySize,QString path/*QFileInfoList path*/);
-    bool CLHAxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, int &yEnd, int &ySize,QString path/*QFileInfoList path*/);
-    bool EXTAxisParam(int &xStart, int &xEnd, int &xSize, int &yStart, int &yEnd, int &ySize,QFileInfoList list);
+    bool PMPLAxisParam(int tunnelCount = 1);
+    bool UGM3AxisParam(/*int &xStart, int &xEnd, int &xSize, int &yStart, int &yEnd, int &ySize,QFileInfoList list*/);
+    bool PMPLRAxisParam(/*int &xStart, int &xEnd, int &xSize, int &yStart, int &yEnd, int &ySize,QFileInfoList list*/);
+    bool LAYERAxisParam(/*int &xStart, int &xEnd, int &xSize, int &yStart, int &yEnd, int &ySize,QString path*//*QFileInfoList path*/);
+    bool CLHAxisParam(/*int &xStart, int &xEnd, int &xSize, int &yStart, int &yEnd, int &ySize,QString path*/);
+    bool EXTAxisParam(/*int &xStart, int &xEnd, int &xSize, int &yStart, int &yEnd, int &ySize,QFileInfoList list*/);
 
     void setGradientScale(QCPColorMap *colorMap);
 
@@ -84,7 +84,7 @@ public:
 
     void setFiletype(const ColorMap::FILE_TYPE &value);
 
-public slots:
+private slots:
     void updatePMPLMap();
     void updateUGM3Map();
     void updatePMPLRMap();
@@ -93,15 +93,8 @@ public slots:
     void updateEXTMap();
     void colorMapClicked(QCPAbstractPlottable*,QMouseEvent*);
     void customPlotClicked(QMouseEvent *event);
-
-
-    //显示tooltip定时器函数
-    void showToolTip();
-
-
-private slots:
+    void showToolTip();     //显示tooltip定时器函数
     void on_closeButton_clicked();
-
     void on_captureButton_clicked();
     
 private:
@@ -109,8 +102,11 @@ private:
     QString dataDir;
     QVector<QVector<QVector<DataFormat*> > > list;  //tunnel<dir<file<line>>>
     QString lastReadFile;//上次遍历文件夹时获取到的数据
+    int lastFilePos;    //上次读取的文件的下标list[lastFilePos]
     int tunnelCount;//通道数量
     ColorMap::FILE_TYPE filetype;
+//    bool isRealTime = false;
+    int xStart,xEnd,xSize,yStart,yEnd,ySize;
 };
 
 #endif // MAPWINDOW_H

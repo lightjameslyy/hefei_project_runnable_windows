@@ -74,8 +74,8 @@
        <widget class="QPushButton" name="closeButton">
         <property name="geometry">
          <rect>
-          <x>820</x>
-          <y>0</y>
+          <x>800</x>
+          <y>370</y>
           <width>75</width>
           <height>25</height>
          </rect>
@@ -87,8 +87,8 @@
        <widget class="QPushButton" name="captureButton">
         <property name="geometry">
          <rect>
-          <x>700</x>
-          <y>0</y>
+          <x>680</x>
+          <y>370</y>
           <width>75</width>
           <height>25</height>
          </rect>

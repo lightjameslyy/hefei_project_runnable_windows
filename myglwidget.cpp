@@ -5,6 +5,7 @@
 #include <QtOpenGL>
 #include <QKeyEvent>
 #include <QTimer>
+#include <QMap>
 
 
 MyGLWidget::MyGLWidget(QWidget *parent) :
@@ -39,7 +40,7 @@ MyGLWidget::~MyGLWidget()
 
 void MyGLWidget::initializeGL()                         //此处开始对OpenGL进行所以设置
 {
-    glClearColor(0.0, 0.0, 0.0, 0.0);                   //白色背景
+    glClearColor(1.0, 1.0, 1.0, 0.0);                   //白色背景
     glShadeModel(GL_SMOOTH);                            //启用阴影平滑
 
     glClearDepth(1.0);                                  //设置深度缓存
@@ -64,7 +65,7 @@ void MyGLWidget::paintGL()                              //从这里开始进行�
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //清除屏幕和深度缓存
     glLoadIdentity();                                   //重置当前的模型观察矩阵
 
-    glTranslatef(0.0f, 0.0f, -50.0f);
+    glTranslatef(0.0f, -15.0f, -50.0f);
 
     glTranslatef(moveX, 0.0f, 0.0f);
     glTranslatef(0.0f, 0.0f, moveZ);
@@ -83,11 +84,13 @@ void MyGLWidget::paintGL()                              //从这里开始进行�
 
 bool MyGLWidget::get3DDataParam(QFileInfoList list)
 {
-//    QVector<MapPos> allPos;     //不存重复的经纬度位置信息
     this->data3D.clear();
     int fileNum = list.size();
 
-    QString lastPosInfo = "";
+//    QString lastPosInfo = "";
+    MapPos* lastPos = new MapPos(0.0, 0.0);
+    QMap<QString, int> mapPosToFileIndex;
+    int wrongFileCount = 0;
     for (int i = 0; i < fileNum; i++)      //遍历所有.pmpl文件
     {
         QFile file(list[i].absoluteFilePath());
@@ -96,18 +99,23 @@ bool MyGLWidget::get3DDataParam(QFileInfoList list)
             qDebug()<<"文件未找到";
             return false;
         }
-
         QTextStream in(&file);
         QString posInfo;
         in>>posInfo;
-
-        if (lastPosInfo == posInfo || posInfo.indexOf(',') == -1)
-            continue;
-        else {
-            lastPosInfo = posInfo;
-        }
-
         MapPos* pos = getMapPosFromLine(posInfo);
+        if (!pos) {
+            ++wrongFileCount;
+            continue;       //格式不符
+        }
+        mapPosToFileIndex[posInfo] = i - wrongFileCount;
+
+//        if (lastPosInfo == posInfo )       //忽略重复的的地理坐标
+//            continue;
+//        else {
+//            minLongtitude = std::min(minLongtitude, pos->longtitude);
+//            minLatitude = std::min(minLatitude, pos->latitude);
+//            lastPosInfo = posInfo;
+//        }
         in.readLine();
         in.readLine();
 
@@ -118,29 +126,42 @@ bool MyGLWidget::get3DDataParam(QFileInfoList list)
         double value;
         while (in.atEnd() == false) {
             in>>height>>value;
-//            MetaDataFormat* metaData = new MetaDataFormat(height, value);
             metaDatas.push_back(new MetaDataFormat(height, value));
             setMaxHeight(std::max(getMaxHeight(), height));
             setMaxValue(std::max(getMaxValue(), value));
-//            maxHeight = std::max(maxHeight, height);
-//            maxValue = std::max(maxValue, value);
             in.readLine();
         }
-//        MapDataFormat* mapData = new MapDataFormat(*pos, *metaDatas);
         this->data3D.push_back(new MapDataFormat(pos, metaDatas));
 
-//        printf("%.7f,%.7f\n", pos->longtitude, pos->latitude);
-//        qDebug()<< pos->longtitude<<pos->latitude;
-//        qDebug()<<lat;
-
-
     }
-
+    uniquePosIndex = mapPosToFileIndex.values();
+    qSort(uniquePosIndex.begin(), uniquePosIndex.end());
+//    for (QMap<QString, int>::iterator i = mapPosToFileIndex.begin(); i != mapPosToFileIndex.end(); ++i) {
+//        qDebug()<<i.key()<<i.value();
+//    }
+//    for (auto i : uniquePosIndex)
+//        qDebug()<<i;
+    double firstLot = data3D[0]->pos->longtitude*100;
+    double firstLat = data3D[0]->pos->latitude*100;
+    data3D[0]->pos->longtitude = 0.0;
+    data3D[0]->pos->latitude = 0.0;
+//    qDebug()<<data3D[0]->pos->longtitude<<data3D[0]->pos->latitude;
+    for (auto i : uniquePosIndex) {
+        data3D[i]->pos->longtitude = data3D[i]->pos->longtitude*100 - firstLot;
+        data3D[i]->pos->latitude = data3D[i]->pos->latitude*100 - firstLat;
+//        qDebug()<<i<<data3D[i]->pos->longtitude<<data3D[i]->pos->latitude;
+    }
+//    for (int i = 0; i < data3D.size(); i += 10) {
+//        qDebug()<<data3D[i]->pos->longtitude<<data3D[i]->pos->latitude;
+//    }
+//    qDebug()<<maxHeight<<maxValue;
+//    qDebug()<<data3D.size();
     return true;
 }
 
 MapPos* MyGLWidget::getMapPosFromLine(QString s)
 {
+    if (s.indexOf(',') ==  -1) return NULL;
     double longtitude;
     double latitude;
     int colonPos = s.indexOf(',');
@@ -242,11 +263,11 @@ void MyGLWidget::drawAxis()
     glEnd();
 
     //y axis
-    glColor3f(0.0f, 1.0f, 0.0f);
-    glBegin(GL_LINES);
-        glVertex3f(0.0f, -18.0f, 0.0f);
-        glVertex3f(0.0f, 18.0f, 0.0f);
-    glEnd();
+//    glColor3f(0.0f, 1.0f, 0.0f);
+//    glBegin(GL_LINES);
+//        glVertex3f(0.0f, -18.0f, 0.0f);
+//        glVertex3f(0.0f, 18.0f, 0.0f);
+//    glEnd();
 
     //z axis
     glColor3f(0.0f, 0.0f, 1.0f);
@@ -277,20 +298,49 @@ void MyGLWidget::drawAxis()
 
 void MyGLWidget::draw3D()
 {
-    //数据已经在data3D中了
-
-    qDebug()<<maxHeight<<maxValue;
-    qDebug()<<data3D.size();
     glLineWidth(2.0f);
-    for(auto item : data3D) {
-//        qDebug()<<item->pos->longtitude<<item->pos->latitude;
-//        glLineWidth(2.0f);
-        for (auto point : item->data) {
-            glColor3f(point->value/maxValue, 1.0f, 0.0f);
-            glBegin(GL_POINTS);
-                glVertex3f(item->pos->longtitude/10.0f, point->value*10.0f/maxValue, item->pos->latitude/10.0f);
-            glEnd();
+//    MapDataFormat* lastItem = data3D[0];
+    double lotStep = 0;
+    double latStep = 0;
+    int lastIndex = 0;
+    for (int i = 0; i < uniquePosIndex.size()-1; ++i) {
+//        qDebug()<<data3D[uniquePosIndex[i]]->pos->longtitude<<data3D[uniquePosIndex[i]]->pos->latitude;
+        int fileDistance = uniquePosIndex[i] - lastIndex;
+        lotStep = (data3D[uniquePosIndex[i+1]]->pos->longtitude - data3D[lastIndex]->pos->longtitude) / fileDistance;
+        latStep = (data3D[uniquePosIndex[i+1]]->pos->latitude - data3D[lastIndex]->pos->latitude) / fileDistance;
+        int times= 0;
+        for (int j = lastIndex; j <= uniquePosIndex[i]; ++j) {
+            for (MetaDataFormat* point : data3D[j]->data) {
+                double relativeValue = point->value/maxValue;
+                if (relativeValue > 0.5)
+                    glColor3d(relativeValue, relativeValue, 0.0f);
+                else if (relativeValue > 0.25)
+                    glColor3d(0.0, relativeValue+0.5, 0.0);
+                else
+                    glColor3d(0.0, relativeValue, 0.0);
+                glBegin(GL_POINTS);
+                    glVertex3d(data3D[lastIndex]->pos->longtitude + lotStep*times, point->height*10.0/maxHeight,
+                               data3D[lastIndex]->pos->latitude + latStep*times);
+                glEnd();
+            }
+            ++times;
         }
+//        qDebug()<<lotStep<<latStep;
+        lastIndex = uniquePosIndex[i];
     }
+//    for(MapDataFormat* item : data3D) {
+//        lotStep = (item->pos->longtitude - lastItem->pos->longtitude)/10.0;
+//        latStep = (item->pos->latitude - lastItem->pos->latitude)/10.0;
+
+//        for (int i = 0; i < 10; ++i) {
+//            for (MetaDataFormat* point : lastItem->data) {
+//                glColor3f(point->value/maxValue, 1.0f, 0.0f);
+//                glBegin(GL_POINTS);
+//                    glVertex3d(item->pos->longtitude + lotStep*i, point->value*10.0/maxValue, item->pos->latitude + latStep*i);
+//                glEnd();
+//            }
+//        }
+//        lastItem = item;
+//    }
 
 }

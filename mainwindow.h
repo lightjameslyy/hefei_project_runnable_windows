@@ -30,6 +30,8 @@ public:
     QString getFiletypeFromFileDir(QString dir);
 
 
+    bool getIsRealTime() const { return isRealTime;};
+
 private slots:
     void on_btn_site_clicked();
 
@@ -39,12 +41,24 @@ private slots:
 
     void on_btn_3DDisplay_clicked();
 
+    void on_checkBox_reatimeDisplay_clicked();
+
+    void on_action_5_triggered();
+
+    void on_action3D_triggered();
+
+    void on_actionOn_triggered();
+
+    void on_actionOff_triggered();
+
+    void on_action_7_triggered();
+
 private:
     Ui::MainWindow *ui;
     Dialog_GraphDisplay *dialog_graph;
     Dialog_Site *dialog_site;
     bool drawn[6];      //判断6种图是否已经画出，下标从0到5依次对应PMPL,CLH,EXT,LAYER,UGM3,PMPLR
-
+    bool isRealTime = false;
 };
 
 #endif // MAINWINDOW_H

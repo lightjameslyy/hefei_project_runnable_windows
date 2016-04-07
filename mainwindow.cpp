@@ -14,9 +14,13 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     this->dialog_site = NULL;
     this->dialog_graph = NULL;
+    ui->groupBox->setVisible(false);
+    ui->tab_2->setVisible(false);
 
-//    QUrl url("file:///C:\\Users\\LiYazhou\\Desktop\\hefei_project-master\\mymap.html");
-    QUrl url("file:///C:/workspace/qt/hefei_project_runnable_windows/mymap.html");
+//    QMessageBox::information(this,"working directory",QDir::currentPath());
+
+//    QUrl url("file:///C:/workspace/qt/hefei_project_runnable_windows/mymap.html");
+    QUrl url("file:///"+QDir::currentPath()+"/mymap.html");
     ui->webView_map->setUrl(url);
 
     ui->listWidget->setAutoScroll(true);
@@ -32,31 +36,29 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_btn_site_clicked()
 {
-    if(!this->dialog_site)
-    {
-        dialog_site = new Dialog_Site;
-    }
-    //dialog_site->show();
-    dialog_site->exec();
-    //qDebug() << this->dialog_site->latitude;
-    //qDebug()<<this->dialog_site->longitude;
-    if(this->dialog_site->result() == 1)
-    {
-        float lat = this->dialog_site->getLatitude().toFloat();
-        float lon = this->dialog_site->getLontitude().toFloat();
-        this->ui->lineEdit_lon->setText(this->dialog_site->getLontitude());
-        this->ui->lineEdit_lat->setText(this->dialog_site->getLatitude());
-        this->setGraphPosition(lon, lat);
-    }
+//    if(!this->dialog_site)
+//    {
+//        dialog_site = new Dialog_Site;
+//    }
+//    //dialog_site->show();
+//    dialog_site->exec();
+//    //qDebug() << this->dialog_site->latitude;
+//    //qDebug()<<this->dialog_site->longitude;
+//    if(this->dialog_site->result() == 1)
+//    {
+//        float lat = this->dialog_site->getLatitude().toFloat();
+//        float lon = this->dialog_site->getLontitude().toFloat();
+//        this->ui->lineEdit_lon->setText(this->dialog_site->getLontitude());
+//        this->ui->lineEdit_lat->setText(this->dialog_site->getLatitude());
+//        this->setGraphPosition(lon, lat);
+//    }
 }
 
 void MainWindow::on_btn_graphDisplay_clicked()
 {
-    if(!this->dialog_graph)
-        dialog_graph = new Dialog_GraphDisplay(this);
-
-//    qDebug()<<this;
-    dialog_graph->show();
+//    if(!this->dialog_graph)
+//        dialog_graph = new Dialog_GraphDisplay(this);
+//    dialog_graph->show();
 }
 
 void MainWindow::setGraphPosition(float lon, float lat)
@@ -114,7 +116,7 @@ void MainWindow::draw(QString dataDir, ColorMap::FILE_TYPE filetype)
     MapWindow *mp = new MapWindow(this);
 //    qDebug()<<this;
     mp->setFiletype(filetype);
-    mp->plot(dataDir, filetype);
+    mp->plot(dataDir, filetype, isRealTime);
     mp->setFixedSize(mp->width(),mp->height());
 
     QListWidgetItem* item = new QListWidgetItem(ui->listWidget);
@@ -183,6 +185,44 @@ void MainWindow::on_groupBox_clicked()
 
 void MainWindow::on_btn_3DDisplay_clicked()
 {
+//    QString dataDir;
+//    dataDir = QFileDialog::getExistingDirectory(
+//                this,
+//                tr("Open Directory"),
+//                "/",
+//                QFileDialog::ShowDirsOnly|QFileDialog::DontResolveSymlinks
+//                );
+
+//    QDir dir(dataDir);
+//    QFileInfoList infoList = dir.entryInfoList(QDir::Files|QDir::NoDotAndDotDot);
+
+//    if (infoList.size() > 0 &&
+//            infoList[0].absoluteFilePath().right(4) == "pmpl") {
+//        MyGLWidget *w = new MyGLWidget(dataDir);
+//        w->get3DDataParam(infoList);        //这句之后w->data3D赋值完毕
+//        w->resize(1000,800);
+//        w->show();
+//    }
+}
+
+void MainWindow::on_checkBox_reatimeDisplay_clicked()
+{
+//    if (ui->checkBox_reatimeDisplay->isChecked())
+//        this->isRealTime = true;
+//    else
+//        this->isRealTime = false;
+}
+
+
+void MainWindow::on_action_5_triggered()
+{
+    if(!this->dialog_graph)
+        dialog_graph = new Dialog_GraphDisplay(this);
+    dialog_graph->show();
+}
+
+void MainWindow::on_action3D_triggered()
+{
     QString dataDir;
     dataDir = QFileDialog::getExistingDirectory(
                 this,
@@ -194,16 +234,42 @@ void MainWindow::on_btn_3DDisplay_clicked()
     QDir dir(dataDir);
     QFileInfoList infoList = dir.entryInfoList(QDir::Files|QDir::NoDotAndDotDot);
 
-//    qDebug()<<infoList[0].absoluteFilePath().right(4);
     if (infoList.size() > 0 &&
             infoList[0].absoluteFilePath().right(4) == "pmpl") {
         MyGLWidget *w = new MyGLWidget(dataDir);
         w->get3DDataParam(infoList);        //这句之后w->data3D赋值完毕
         w->resize(1000,800);
-
+        w->setWindowTitle("3D扫描图");
         w->show();
     }
+}
 
-//    qDebug() << dataDir;
+void MainWindow::on_actionOn_triggered()
+{
+    this->isRealTime = true;
+}
 
+void MainWindow::on_actionOff_triggered()
+{
+    this->isRealTime = false;
+}
+
+void MainWindow::on_action_7_triggered()
+{
+    if(!this->dialog_site)
+    {
+        dialog_site = new Dialog_Site;
+    }
+    //dialog_site->show();
+    dialog_site->exec();
+    //qDebug() << this->dialog_site->latitude;
+    //qDebug()<<this->dialog_site->longitude;
+    if(this->dialog_site->result() == 1)
+    {
+        float lat = this->dialog_site->getLatitude().toFloat();
+        float lon = this->dialog_site->getLontitude().toFloat();
+        this->ui->lineEdit_lon->setText(this->dialog_site->getLontitude());
+        this->ui->lineEdit_lat->setText(this->dialog_site->getLatitude());
+        this->setGraphPosition(lon, lat);
+    }
 }
